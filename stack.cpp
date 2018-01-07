@@ -1,8 +1,20 @@
+//==========================================================//
+//	Name  				- 	Arpit singh						//
+//	Roll number 		- 	111601031						//				
+//	Date				-   Januray 6 , 2018				//
+//	program Description - 	For stack library				//
+//															//
+//==========================================================//
+
+
+
+
+
 //To include all the libraries of the c++
 #include <iostream>
 #include <stdio.h>
 #include <string>
-#include <string.h>
+#include <string.h>	
 #include <cmath>
 
 using namespace std;

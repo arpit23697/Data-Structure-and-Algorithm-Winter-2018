@@ -1,3 +1,12 @@
+//==========================================================//
+//	Name  				- 	Arpit singh						//
+//	Roll number 		- 	111601031						//				
+//	Date				-   Januray 6 , 2018				//
+//	program Description - 	For vector library				//
+//															//
+//==========================================================//
+
+
 //To include all the libraries of the c++
 #include <iostream>
 #include <stdio.h>
@@ -41,7 +50,7 @@ class Vector
 	struct node <T> * begin (){ return head; }
 
 	//this function returns the pointer to the end of the vector
-	struct node <T> * end () { return tale -> next;}
+	struct node <T> * end () {return NULL;}	
 
 	//returns the size of the vector
 	int size () { return s;}
