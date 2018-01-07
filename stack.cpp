@@ -7,22 +7,24 @@
 
 using namespace std;
 //Stack is defined using the stack class here
+//#include "vector.hpp"
 
 template <typename T>
-struct node 
+struct nod 
 {
 	T data;
-	struct node * next;
-	struct node * prev;
+	struct nod *next;
+	struct nod *prev;
 };
+
 
 template <typename T>
 class Stack
 {
 
 	private :
-		struct node <T> *head;
-		struct node <T> *tale;
+		struct nod <T> *head;
+		struct nod <T> *tale;
 		int s = 0; 
 
 	public:
@@ -51,7 +53,7 @@ class Stack
 	//this is used to push the element at the top of the stack
 	void push (T x)
 	{
-		struct node <T> *temp = (struct node <T> * )malloc (sizeof (struct node <T>));
+		struct nod <T> *temp = (struct nod <T> * )malloc (sizeof (struct nod <T>));
 		temp -> data = x;
 
 		if (head == NULL)
@@ -77,7 +79,7 @@ class Stack
 	{
 		if (size() != 0)
 		{
-			struct node <T>* temp = (struct node <T> *)malloc (sizeof (struct node <T>));
+			struct nod <T>* temp ;
 			temp = tale;
 			tale = tale -> prev;
 

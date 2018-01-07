@@ -4,31 +4,30 @@
 #include <string>
 #include <string.h>
 #include <cmath>
-#include "stack.cpp"
+
 
 using namespace std;
 
+//including the self made libraries
+#include "vector.cpp"
+#include "stack.cpp"
+#include "Graph.cpp"
 
 int main ()
 {
-	Stack<int> s = Stack <int>();
-	s.push (10);
-	s.push (20);
-	cout << s.size() << endl;
-	s.push (40);
-	s.pop();
-	s.pop();
+	Graph G;
 
-	cout << s.size() << endl;
-	s.push(33);
-	s.push(37);
-	cout << s.size() << endl;
+	char filename[100];
+	cout << "Enter the name of the file : ";
+	cin >> filename;
 
-	while (!s.empty())
-	{
-		cout << s.top() << endl;
-		s.pop();
-	}
+	//reading the graph and checking for the error
+	if (!G.read_Graph (filename))
+		return 0;
+
+	//printing the Graph 
+	G.print_list();
+	G.print_matrix();
 
 	return 0;
 }
