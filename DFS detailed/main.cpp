@@ -87,14 +87,21 @@ int main ()
 	}
 
 	//asking for the value of the starting vertex	
-	int x;
-	cout << "Enter the starting vertex : ";
-	cin >> x;
+	//int x;
+	//cout << "Enter the starting vertex : ";
+	//cin >> x;
 
 	//calling the DFS function
-	DFS (G , x);
-	parent[x] = -1;
-
+	//DFS (G , 6);
+	//parent[6] = -7;
+	for (int i = 0 ; i < n ; i++)
+	{	
+		if (visited[i] == false)
+		{			
+			DFS (G , i);
+			parent[i] = -(i+1);
+		} 
+	}
 	cout << "Pre and post visit time of each of the vertices " << endl;
 	for (int i = 0 ; i < n ; i++)
 		cout << i << "   [ " << pre[i] << " , " << post[i] << " ] "<< endl;
