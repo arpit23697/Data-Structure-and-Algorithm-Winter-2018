@@ -28,7 +28,7 @@ int main ()
 
         //Generating the file (binary file) with lots of numbers
                 FILE *file = fopen (filename , "w");
-                for (int i =0 ; i < 100000 ; i++)
+                for (int i =0 ; i < 10000 ; i++)
                 {
                         int temp = rand();
                         fwrite (&temp , sizeof (temp) , 1 , file);
