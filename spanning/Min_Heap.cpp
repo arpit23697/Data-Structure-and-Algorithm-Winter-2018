@@ -19,16 +19,11 @@
 using namespace std;
 
 
-//including the self made libraries
-#include "pairs.cpp"
-#include "vector.cpp"
-#include "stack.cpp"
-
 template <typename T>
 struct min_node
 {
     T data;
-    int pos;
+    int path;
 };
 
 
@@ -39,20 +34,23 @@ public:
 
         struct min_node <T> *a;
         int size;
-        int *x;
+        int *listOfindices;
 
 
         public:
         //
         Min_Heap (){
             a = (struct min_node <T> *)malloc (10000 * sizeof (struct min_node <T>));
+            listOfindices = (int *)malloc (100000 * sizeof (int));
             size = 0;
 
         }
 
         Min_Heap (T * array , int n) {
             a = (struct min_node <T> *)malloc (10000 * sizeof (struct min_node <T>));
-            x = (int *)malloc (100000 * sizeof (int));
+            listOfindices = (int *)malloc (100000 * sizeof (int));
+
+
             build (array , n);
 
         }
@@ -81,6 +79,13 @@ public:
                 return -1;
             else
                 return index/2;
+        }
+        bool isEmpty ()
+        {
+            if (size == 0)
+            return true;
+            else
+            return false;
         }
 
         //this function implements the min-heapify with the given min index
@@ -112,14 +117,14 @@ public:
                 //swap the min element
                 if (minimum < a[index].data)
                 {
-                    int temp2 = a[index].pos;
-                    a[index].pos = a[replace].pos;
-                    a[replace].pos = temp2;
-                     
+                    int temp2 = listOfindices[a[index].path];
+                    listOfindices[a[index].path] = listOfindices[a[replace].path];
+                    listOfindices[a[replace].path] = temp2;
 
-                    T temp = a[index].data;
-                    a[index].data = a[replace].data;
-                    a[replace].data = temp;
+
+                    struct min_node <T> temp = a[index];
+                    a[index] = a[replace];
+                    a[replace] = temp;
 
                     Min_heapify (replace);
                 }
@@ -133,28 +138,36 @@ public:
             for (int i = 0 ; i < n ; i++ )
             {
                 a[i+1].data = array[i];
-                x[array[i]] = i+1;
-                a[i+1].pos = i+1;
+                a[i+1].path = i;
                 size = n;
             }
+
+            for (int i= 0 ; i < n ; i++)
+                listOfindices[a[i+1].path] = i+1;
+
+
+
             for (int i = size ; i >= 1 ; i--){
                 Min_heapify (i);
-
 
             }
         }
 
-        void decrease_key (int posn)
+        void decrease_key (int posn , T x)
         //this is going to decrease the key and then return the new index of the key
         {
-            
+            //if (x > a[posn].data )
+              //  return;
+            //cout << posn << endl;
+
+            a[posn].data = x;
             while (posn > 1 && a[posn].data < a[posn/2].data)
             {
-                int temp2 = a[posn].pos;
-                a[posn].pos = a[posn/2].pos;
-                a[posn/2].pos = temp2;
+                int temp2 = listOfindices[a[posn].path];
+                listOfindices[a[posn].path] = listOfindices[a[posn/2].path];
+                listOfindices[a[posn/2].path] = temp2;
 
-                T temp = a[posn];
+                struct min_node <T> temp = a[posn];
                 a[posn] = a[posn / 2];
                 a[posn / 2] = temp;
                 posn = posn / 2;
@@ -162,7 +175,7 @@ public:
 
 
 
-            
+
 
         }
 
@@ -179,18 +192,19 @@ public:
 
             //inserting the element
             a[size].data = element;
-            a[size].pos = size;
+            a[size].path = size - 1;
+            listOfindices[a[size].path] = size;
             int posn = size;
             while (posn > 1 && a[posn].data < a[posn/2].data)
             {
-                int temp = x[a[posn/2].data];
-                a[size].pos = posn/2;
-                a[x].pos = posn;
 
+                int temp2 = listOfindices[a[posn].path];
+                listOfindices[a[posn].path] = listOfindices[a[posn/2].path];
+                listOfindices[a[posn/2].path] = temp2;
 
-                T temp = a[posn].data;
-                a[posn].data = a[posn / 2].data;
-                a[posn / 2].data = temp;
+                struct min_node <T> temp = a[posn];
+                a[posn] = a[posn / 2];
+                a[posn / 2] = temp;
                 posn = posn/2;
 
             }
@@ -200,9 +214,17 @@ public:
         T Min_pop ()
         {
             T result = a[1].data;
-            a[1].data = a[size].data;
 
-            a[1].pos = a[size].pos;
+            int temp2 = listOfindices[a[1].path];
+            listOfindices[a[1].path] = listOfindices[a[size].path];
+            listOfindices[a[size].path] = temp2;
+
+            struct min_node <T> temp = a[1];
+            a[1] = a[size];
+            a[size] = temp;
+
+            a[size].path = -1;
+
 
             size--;
             if (size > 1)
@@ -227,6 +249,8 @@ public:
         }
 
 };
+
+/*
 //test bench
 
 
@@ -264,7 +288,7 @@ int main ()
         {
         	//create the heap
                 case(1): { cout << "Enter the number of the elements :";
-                        
+
                         cin >> n;
                         pairs * array  = (pairs *) malloc (n * sizeof (pairs));
                         cout << "Enter the elements of the array\n";
@@ -341,11 +365,11 @@ int main ()
                 break;
         }
 
-        for (int i = 1 ; i <= myHeap.size ; i++)
-            cout << myHeap.a[i].pos << " ";
+        for (int i = 0 ; i < n ; i++)
+            cout << myHeap.listOfindices[i] << " ";
         cout << endl;
-        
+
     }while (choice != 10);
 
     return 0;
-}
+}*/
