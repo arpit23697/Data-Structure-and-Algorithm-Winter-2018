@@ -64,7 +64,7 @@ int main ()
 				pairs p = c->data;
 				int v = p.first;
 				int weight = p.second;
-
+				
 				//seeing if the edge is relaxed then printing the cycle
 				Vector <int> cycle = Vector <int> ();
 				if (dist[v] > dist[u] + weight)
@@ -72,8 +72,11 @@ int main ()
 					
 					int current = v;
 					flag = true;			//to see if this is involved in the cycle or not
+					int x = 0;
 					while (1)
 					{
+						x++;
+						//cout << x << endl;
 						cycle.push_back (current);
 						current = pre[current];
 						if (current == -1)
@@ -86,8 +89,14 @@ int main ()
 							flag = true;
 							break;
 						}
+
+						if (x > n)
+						{
+							flag = false;
+							break;
+						}
 					}
-				}
+
 				//if the cycle is there then printing the cycle
 				if (flag)
 				{
@@ -101,12 +110,12 @@ int main ()
 				}
 
 			}
-			if (flag)
-				break;
+				if (flag)
+					break;
 		}
-
-
 	}
+	}
+
 	else
 	{
 		//if there is no negative weight cycle then printing the result i.e. the distances and the pre values
