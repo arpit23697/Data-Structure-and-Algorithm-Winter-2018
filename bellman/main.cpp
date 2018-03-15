@@ -55,65 +55,44 @@ int main ()
 	if (isCycle)
 	{
 		cout << "There is a negative weighted cycle in the graph that is reachable from the start vertex" << endl;
-		for (int i =0  ; i < n ; i++)
+		int cycleOn = -1;
+		for (int i = 0 ; i < n ; i++)
 		{
-			bool flag;
-			for (struct node <pairs> *c = G.AL[i].begin() ; c != NULL ; c = c -> next)
-			{
-				int u = i;
-				pairs p = c->data;
-				int v = p.first;
-				int weight = p.second;
-				
-				//seeing if the edge is relaxed then printing the cycle
-				Vector <int> cycle = Vector <int> ();
-				if (dist[v] > dist[u] + weight)
-				{
-					
-					int current = v;
-					flag = true;			//to see if this is involved in the cycle or not
-					int x = 0;
-					while (1)
-					{
-						x++;
-						//cout << x << endl;
-						cycle.push_back (current);
-						current = pre[current];
-						if (current == -1)
-						{
-							flag = false;
-							break;
-						}
-						if (current == v)
-						{
-							flag = true;
-							break;
-						}
-
-						if (x > n)
-						{
-							flag = false;
-							break;
-						}
-					}
-
-				//if the cycle is there then printing the cycle
-				if (flag)
-				{
-					cout << "The negative weighted cycle is  : " << endl;
-					//printing the cycle
-					for (struct node <int> * c = cycle.tale ; c != NULL ; c = c-> prev)
-						cout << c->data << "--";
-
-					cout << endl;
-					break;	
-				}
-
-			}
-				if (flag)
-					break;
+			if (dist[i] != inf)
+			cycleOn = i;
 		}
-	}
+
+		int *flags = (int*)malloc (n * sizeof (int));
+		for (int i= 0 ; i < n ; i++)
+			flags[i] = 0;
+
+		int current = cycleOn;
+		while (1)
+		{
+			if (flags[current] == 0)
+				flags[current] = 1;
+			else if (flags[current] == 1)
+			{
+				cycleOn = current;
+				break;
+			}
+			current = pre[current];
+		}
+
+		Vector <int> Cycle = Vector <int> ();
+		current = cycleOn;
+		do
+		{
+			Cycle.push_back(current);
+			current = pre[current];
+
+		}while(current != cycleOn);
+
+		for (struct node <int> *c = Cycle.tale ; c != NULL ; c= c->prev )
+			cout << " - " << c->data << " - ";
+		cout << endl;
+		
+	
 	}
 
 	else
