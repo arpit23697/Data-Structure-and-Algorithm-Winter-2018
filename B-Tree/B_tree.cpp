@@ -207,7 +207,7 @@ class B_Tree
 
 int main ()
 {
-    B_Tree myTree = B_Tree (2);         //this is the creation of the B_tree with the min parameter to be set to 2;
+    B_Tree myTree = B_Tree (3);         //this is the creation of the B_tree with the min parameter to be set to 2;
     int n;
     cout << "Enter n :";
     cin >> n;
