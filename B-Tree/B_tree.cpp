@@ -168,19 +168,29 @@ class B_Tree
         }
     }
 
-    void print_tree ( nodeB &x , int nodes_printed)
+    void print_tree ( nodeB &x , int offset)
     {
-        cout << nodes_printed << ".  :  n = " << x.n << " --- ";
-        for (int i= 0 ; i < x.n ; i++)
-        cout << x.key[i] << " ";
-        cout << endl;
+        if (x.leaf == true)
+        {
+            for (int i= 0 ; i < x.n ; i++)
+            {
+                for (int j = 0 ; j < offset ; j++)
+                cout << "\t";
+                cout << x.key[i] << endl;
+
+            }
+        }
         if (x.leaf == false)
         {
-        for (int i = 0 ; i <= x.n ; i++)
-        {
-            nodes_printed++;
-            print_tree (x.child[i] , nodes_printed); 
-        }
+            int i;
+            for (i = 0 ; i < x.n ; i++)
+            {
+                print_tree (x.child[i] , offset + 1); 
+                for (int j = 0 ; j < offset ; j++)
+                cout << "\t";
+                cout << x.key[i] << endl;
+            }
+            print_tree (x.child[i] , offset + 1);
         }
     }
 
@@ -202,52 +212,313 @@ class B_Tree
         }
     }
 
+    void deleteKey (nodeB &x , int del)
+    //node is x and the key to be deleted is del
+    {
+        int i= 0 ;
+        while (i < x.n && del > x.key[i])
+            i++;
+        
+        //we have found the key 
+        if (i < x.n && del == x.key[i])
+        {
+            if (x.leaf == true)
+            {
+                for (int j = i ; j < x.n-1 ; j++)
+                    x.key[j] = x.key[j+1];
+                
+                x.n = x.n -1;
+            }
+            else            //if the key to be deleted is present in the node but it is the internal node 
+            {              //so we first delete the predecessor then replace it with the key
+                if (x.child[i].n != T-1)
+                {
+                    nodeB z = x.child[i]; //this is to store the predecessor the predecessor
+                    while (z.leaf == false)
+                        z = z.child[z.n];        //this is to get the (n+1)th child
+                
+                    int predecessor = z.key[z.n-1];
+                    deleteKey (x , predecessor);
+                    x.key[i] = predecessor;
+                    return;
+                }
+                else if (i < x.n && x.child[i+1].n != T-1)
+                {
+                    nodeB z = x.child[i+1];
+                    while (z.leaf == false)
+                        z = z.child[0];
+
+                    int successor = z.key[0];
+                    deleteKey (x , successor);
+                    x.key[i] = successor;
+                    return;
+                }
+            }
+
+            
+        }
+        if (x.leaf == true)
+        {
+            //cout << "The delete key " << del << " is not present in the tree " << endl;
+            return;
+        }
+        //the child to which we are descending is not minimal
+        if (x.child[i].n != T-1)
+        {
+            deleteKey(x.child[i] , del);
+            return ;
+        }
+
+        //means  the child to which we are descending is minimal
+        if (x.child[i].n == T-1)
+        {
+            if (i > 0 && x.child[i-1].n != T-1)     //left child is not minimal then do the local rotation
+            {
+                nodeB center = x.child[i];
+                nodeB lSibling = x.child[i-1];
+                
+                //shifting the keys of the center to the right
+                for (int i = center.n - 1 ; i >= 0 ; i--)
+                    center.key[i+1] = center.key[i];
+
+                //shifting the children to the right if it is not a leaf
+                if (center.leaf == false)
+                {
+                    for (int i = center.n ; i >= 0 ; i--)
+                    center.child[i+1] = center.child[i];
+                }
+                center.n = center.n+1;
+                //copying the key of the parent and the child to the parent 
+                center.key[0] = x.key[i-1];
+                if (center.leaf == false)
+                    center.child[0] = lSibling.child[lSibling.n];
+
+                //updating the x
+                x.key[i-1] = lSibling.key[lSibling.n - 1];
+
+                //updating the leftSibling
+                lSibling.n = lSibling.n - 1;
+                x.child[i-1] = lSibling;
+                x.child[i] = center;
+                deleteKey (x.child[i] , del);  
+                return;   
+            }
+            else if (i < x.n && x.child[i+1].n != T-1)
+            {
+                nodeB rSibling = x.child[i+1];
+                nodeB center = x.child[i];
+
+                //taking the value of the left most key of the rSibling to the x
+                center.key[center.n - 1] = x.key[i];
+                x.key[i] = rSibling.key[0];
+                center.n = center.n + 1;
+
+                if (center.leaf == false)
+                center.child[center.n] = rSibling.child[0];
+
+                //now the remaining part is to update the rSibling by shifting left
+                for (int i= 0 ; i < rSibling.n-1 ; i++)
+                rSibling.key[i] = rSibling.key[i+1];
+
+                //shifting the child if the node is not the leaf
+                if (rSibling.leaf == false)
+                {
+                    for (int i= 0 ; i < rSibling.n ; i++)
+                    rSibling.child[i] = rSibling.child[i+1];
+                }
+                rSibling.n = rSibling.n - 1;
+                x.child[i] = center;
+                x.child[i+1] = rSibling;
+                deleteKey (x.child[i] , del);
+                return;
+                
+            }
+            //if both the immediate siblings are also minimal then just merge it with the appropriate sibling
+            else
+            {
+                bool merge = false;
+                if (i > 0)
+                {
+                    //merging with the left sibling
+                    nodeB center = x.child[i];
+                    nodeB lSibling = x.child[i-1];
+                    
+                    //copying the keys
+                    lSibling.key[T-1] = x.key[i-1];
+                    for (int j = 0 ; j < T-1 ; j++)
+                    lSibling.key[T+j] = center.key[j];
+
+                    if (center.leaf == false)
+                    {
+                        for (int j = 0 ; j < T ; j++)
+                        lSibling.child[T+j] = lSibling.child[j];
+                    }
+                    lSibling.n = 2*T - 1;
+
+                    //now updating the value of x
+                        for (int j = i-1 ; j < x.n ; j++)
+                        x.key[j] = x.key[j+1];
+
+                        if (x.leaf == false)
+                        {
+                            for (int j = i ; j < x.n ; j++)
+                            x.child[j] = x.child[j+1];
+                        }
+                        x.n = x.n - 1;
+                        x.child[i-1] = lSibling;
+
+                        //updating the root if necessary
+                        if (x.n == 0)
+                        root = x.child[i-1];
+
+                        merge = true;       //indicating that the cells are merged
+                       // cout << "=============================" << endl;
+                       // print_tree(root, 0);
+                       // cout << "=============================" << endl;
+                        deleteKey (x , del);
+                        return ;
+                
+                }
+                if (merge == false && i < x.n)
+                {
+                    nodeB center = x.child[i+1];
+                    nodeB lSibling = x.child[i];
+
+                    lSibling.key[T - 1] = x.key[i];
+                    for (int j = 0; j < T - 1; j++)
+                        lSibling.key[T + j] = center.key[j];
+
+                    if (center.leaf == false)
+                    {
+                        for (int j = 0; j < T; j++)
+                            lSibling.child[T + j] = lSibling.child[j];
+                    }
+                    lSibling.n = 2 * T - 1;
+
+                    //now updating the value of x
+                    for (int j = i ; j < x.n; j++)
+                        x.key[j] = x.key[j + 1];
+
+                    if (x.leaf == false)
+                    {
+                        for (int j = i+1; j < x.n; j++)
+                            x.child[j] = x.child[j + 1];
+                    }
+                    x.n = x.n - 1;
+                    x.child[i] = lSibling;
+
+                    //updating the root if necessary
+                   if (x.n == 0)
+                  root = x.child[i];
+
+                    merge = true; //indicating that the cells are merged
+                  //  cout << "=============================" << endl;
+                  //  print_tree(root, 0);
+                  //  cout << "=============================" << endl;
+                    deleteKey(x, del);
+                    return;
+                }
+
+            }
+            
+        }
+    }
+
 
 };
 
+void printMenu ()
+{
+    cout << "Menu :" << endl;
+    cout << "1.Build" << endl;
+    cout << "2.Insert " << endl;
+    cout << "3.Print Tree in the readable form " << endl;
+    cout << "4.Delete " << endl;
+    cout << "5.Search for the key " << endl; 
+    cout  << "6.Exit " << endl;  
+}
 int main ()
 {
-    B_Tree myTree = B_Tree (3);         //this is the creation of the B_tree with the min parameter to be set to 2;
+    int choice;
     int n;
-    cout << "Enter n :";
-    cin >> n;
-
-    cout << "Insert the element one by one " << endl;
-    for (int i= 0 ; i < n ; i++)
+    B_Tree myTree = B_Tree (3);         //this is the creation of the B_tree with the min parameter to be set to 2;    
+    do 
     {
-        int a;
-        cin >> a;
-        myTree.B_Tree_insert (a);
-        myTree.print_tree (myTree.root , 1);
-        //myTree.print_in_ascending (myTree.root);
-    }
-
-    int x;
-    cout << "Enter the values you want to find" << endl;
-    while (1) 
-    {
-        cin >> x;
-        if (x == -1)
-        break;
-        ans = Vector <int> ();
-
-        //printing the output 
-        if (myTree.B_tree_search (myTree.root , x))
+        printMenu ();
+        cout << "Enter your choice ";
+        cin >> choice;
+        switch (choice)
         {
-            cout << "key found ; The path is " << endl;
-            cout << "root->  ";
-            for (struct node <int> *c = ans.head ; c != ans.tale ; c = c->next)
+            case(1):
             {
-                cout << "child " << c->data+1 << " -> ";
+                cout << "Enter n :";
+                cin >> n;
+
+                cout << "Insert the element one by one " << endl;
+                for (int i = 0; i < n; i++)
+                {
+                    int a;
+                    cin >> a;
+                    myTree.B_Tree_insert(a);
+                   
+                }
+                break;
             }
-            cout << "index " << ans.tale->data+1 << endl;
-        }
-        else 
-        {
-            cout << "The key not found " << endl;
-        }
-    }
+            case(2):
+            {
+                int element;
+                cout << "Enter the value of the inserting element " << endl;
+                cin >> element;
+                myTree.B_Tree_insert (element);
+                break;
+            }
+            case(3):
+            {
+                cout << "=============================" << endl;
+                myTree.print_tree(myTree.root, 0);
+                cout << "=============================" << endl;
+                break;
+            }
+            case(4):
+            {
+                int element;
+                cout << "Enter the value of the element " << endl;
+                cin >> element;
+                myTree.deleteKey (myTree.root , element);
+                break;
+            }
+            case(5):
+            {
+                int x;
+                cout << "Enter the values you want to find" << endl;
+                cin >> x;
+                    
+                ans = Vector<int>();
 
+                    //printing the output
+                if (myTree.B_tree_search(myTree.root, x))
+                {
+                    cout << "key found ; The path is " << endl;
+                    cout << "root->  ";
+                    for (struct node<int> *c = ans.head; c != ans.tale; c = c->next)
+                    {
+                        cout << "child " << c->data + 1 << " -> ";
+                    }
+                    cout << "index " << ans.tale->data + 1 << endl;
+                }
+                else
+                {
+                    cout << "The key not found " << endl;
+                }
+                break;
+            }
+            
+            case(6) : {break; }
+            default : {cout << "Enter the correct choice " << endl ;}
+            break;
+
+        }
+
+    }while (choice != 6);
     return 0;
-
 }
