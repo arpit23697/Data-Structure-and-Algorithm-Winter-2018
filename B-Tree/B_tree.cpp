@@ -101,6 +101,8 @@ class B_Tree
     //this fucntion is for the special case which is taking the root case separately
     void B_Tree_insert (int k)
     {
+        if (B_tree_search (root , k))
+        return;
         nodeB r = root;
         if (r.n == 2 * T - 1)
         {
@@ -228,6 +230,7 @@ class B_Tree
                     x.key[j] = x.key[j+1];
                 
                 x.n = x.n -1;
+                return;
             }
             else            //if the key to be deleted is present in the node but it is the internal node 
             {              //so we first delete the predecessor then replace it with the key
@@ -253,15 +256,63 @@ class B_Tree
                     x.key[i] = successor;
                     return;
                 }
-            }
+
+                //if both are minimal then merging it
+                
+                
+                if (i < x.n)
+                {
+                    nodeB center = x.child[i + 1];
+                    nodeB lSibling = x.child[i];
+
+                    lSibling.key[T - 1] = x.key[i];
+                    for (int j = 0; j < T - 1; j++)
+                        lSibling.key[T + j] = center.key[j];
+
+                    if (center.leaf == false)
+                    {
+                        for (int j = 0; j < T; j++)
+                            lSibling.child[T + j] = lSibling.child[j];
+                    }
+                    lSibling.n = 2 * T - 1;
+
+                    //now updating the value of x
+                    for (int j = i; j < x.n; j++)
+                        x.key[j] = x.key[j + 1];
+
+                    if (x.leaf == false)
+                    {
+                        for (int j = i + 1; j < x.n; j++)
+                            x.child[j] = x.child[j + 1];
+                    }
+                    x.n = x.n - 1;
+                    x.child[i] = lSibling;
+
+                    //updating the root if necessary
+                    if (x.n == 0)
+                    {    
+                        root = x.child[i];
+                        deleteKey (root , del);
+                        return;
+                    }
+                     //indicating that the cells are merged
+                                   // cout << "merge key found =============================" << endl;
+                                   // print_tree(root, 0);
+                                   // cout << "=============================" << endl;
+                    deleteKey(x.child[i], del);
+                    return;
+                }
 
             
         }
+        }
+
         if (x.leaf == true)
         {
-            //cout << "The delete key " << del << " is not present in the tree " << endl;
+            cout << "The key " << del << "is not present " << endl;
             return;
         }
+       
         //the child to which we are descending is not minimal
         if (x.child[i].n != T-1)
         {
@@ -300,6 +351,9 @@ class B_Tree
                 lSibling.n = lSibling.n - 1;
                 x.child[i-1] = lSibling;
                 x.child[i] = center;
+               //cout << "left =============================" << endl;
+               // print_tree(root, 0);
+               // cout << "=============================" << endl;
                 deleteKey (x.child[i] , del);  
                 return;   
             }
@@ -309,9 +363,11 @@ class B_Tree
                 nodeB center = x.child[i];
 
                 //taking the value of the left most key of the rSibling to the x
-                center.key[center.n - 1] = x.key[i];
+                center.key[center.n] = x.key[i];
                 x.key[i] = rSibling.key[0];
                 center.n = center.n + 1;
+
+
 
                 if (center.leaf == false)
                 center.child[center.n] = rSibling.child[0];
@@ -329,6 +385,9 @@ class B_Tree
                 rSibling.n = rSibling.n - 1;
                 x.child[i] = center;
                 x.child[i+1] = rSibling;
+               // cout << "right =============================" << endl;
+               // print_tree(root, 0);
+               // cout << "=============================" << endl;
                 deleteKey (x.child[i] , del);
                 return;
                 
@@ -351,7 +410,7 @@ class B_Tree
                     if (center.leaf == false)
                     {
                         for (int j = 0 ; j < T ; j++)
-                        lSibling.child[T+j] = lSibling.child[j];
+                        lSibling.child[T+j] = center.child[j];
                     }
                     lSibling.n = 2*T - 1;
 
@@ -369,12 +428,15 @@ class B_Tree
 
                         //updating the root if necessary
                         if (x.n == 0)
-                        root = x.child[i-1];
-
+                        {
+                            root = x.child[i];
+                        deleteKey(root, del);
+                        return;
+                        }
                         merge = true;       //indicating that the cells are merged
-                       // cout << "=============================" << endl;
-                       // print_tree(root, 0);
-                       // cout << "=============================" << endl;
+                      //  cout << "merge key not found left=============================" << endl;
+                      //  print_tree(root, 0);
+                      //  cout << "=============================" << endl;
                         deleteKey (x , del);
                         return ;
                 
@@ -409,12 +471,17 @@ class B_Tree
 
                     //updating the root if necessary
                    if (x.n == 0)
-                  root = x.child[i];
+                   {
+                       root = x.child[i];
+                       deleteKey(root, del);
+                       return;
+                   }
+                  
 
                     merge = true; //indicating that the cells are merged
-                  //  cout << "=============================" << endl;
-                  //  print_tree(root, 0);
-                  //  cout << "=============================" << endl;
+                    //cout << " merge key not found right=============================" << endl;
+                    //print_tree(root, 0);
+                    //cout << "=============================" << endl;
                     deleteKey(x, del);
                     return;
                 }
@@ -422,9 +489,10 @@ class B_Tree
             }
             
         }
+        
     }
 
-
+    
 };
 
 void printMenu ()
@@ -485,6 +553,9 @@ int main ()
                 cout << "Enter the value of the element " << endl;
                 cin >> element;
                 myTree.deleteKey (myTree.root , element);
+                cout << "=============================" << endl;
+                myTree.print_tree(myTree.root, 0);
+                cout << "=============================" << endl;
                 break;
             }
             case(5):
@@ -522,3 +593,59 @@ int main ()
     }while (choice != 6);
     return 0;
 }
+/*
+45
+65
+98
+78
+12
+456
+32
+79
+36
+25
+14
+74
+85
+96
+37
+19
+59
+57
+51
+53
+2
+13
+6
+8
+4
+
+*/
+
+/*
+23
+21
+321
+59
+57
+53
+46
+17
+28
+39
+15
+3
+2
+7
+111
+56
+321
+456
+4
+9
+33
+22
+55
+99
+7777
+*/
