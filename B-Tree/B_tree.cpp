@@ -101,7 +101,7 @@ class B_Tree
     //this fucntion is for the special case which is taking the root case separately
     void B_Tree_insert (int k)
     {
-        if (B_tree_search (root , k))
+        if (B_tree_search (root , k))       //that means that you have find the value in the B-Tree then in order to avoid duplicates just
         return;
         nodeB r = root;
         if (r.n == 2 * T - 1)
@@ -230,7 +230,7 @@ class B_Tree
                     x.key[j] = x.key[j+1];
                 
                 x.n = x.n -1;
-                return;
+                return;         
             }
             else            //if the key to be deleted is present in the node but it is the internal node 
             {              //so we first delete the predecessor then replace it with the key
@@ -272,7 +272,7 @@ class B_Tree
                     if (center.leaf == false)
                     {
                         for (int j = 0; j < T; j++)
-                            lSibling.child[T + j] = lSibling.child[j];
+                            lSibling.child[T + j] = center.child[j];
                     }
                     lSibling.n = 2 * T - 1;
 
@@ -453,7 +453,7 @@ class B_Tree
                     if (center.leaf == false)
                     {
                         for (int j = 0; j < T; j++)
-                            lSibling.child[T + j] = lSibling.child[j];
+                            lSibling.child[T + j] = center.child[j];
                     }
                     lSibling.n = 2 * T - 1;
 

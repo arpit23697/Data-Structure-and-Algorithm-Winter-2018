@@ -62,9 +62,15 @@ class splay_tree
                x->parent = g;
            }
            p->parent = x;
+           if (x->right != NULL)
            x->right->parent = p;
            p->left = x->right;
            x->right = p;
+
+           if (g == NULL)
+           {
+               root = x;
+           }
         }
         //if x is the right child
         else
@@ -87,9 +93,12 @@ class splay_tree
             }
 
             p->parent = x;
+            if (x->left != NULL)
             x->left->parent = p;
             p->right = x->left;
             x->left = p;
+            if (g == NULL)
+            root = x;
         }
     }
 
@@ -103,8 +112,9 @@ class splay_tree
 
         //if the parent is the root of the tree
         if (x->parent == head)
+        {
             rotate (x);
-
+        }
         else
         {
             splayNode *p = x->parent;
@@ -149,7 +159,8 @@ class splay_tree
             temp -> parent = NULL;
             temp -> right = NULL;
             temp -> left = NULL;
-            r = temp;
+            r  = temp;
+            root = r;
             size++;
         }
         else
@@ -216,10 +227,19 @@ class splay_tree
         if (s1 == NULL && s2 == NULL)
         return ;
         else if (s1 == NULL)
-        return ;
+        {
+           
+            s2->parent = NULL;
+            root = s2;
+            return;
+        }
         else if (s2 == NULL)
-        return ;
-        
+        {
+            
+            s1->parent = NULL;
+            root = s1;
+            return;
+        }
         splay (s1 , find_max (s1) );
         s1->parent = NULL;
         s1->right = s2;
@@ -298,9 +318,10 @@ class splay_tree
     {
         if (r == NULL)
         return ;
-        size++;
+        size--;
         splay(r , search (r , key) );
-        join (r->left , r->right);
+        printTree(root , 0);
+        join (root->left , root->right);
     }
 
     void destroy()
